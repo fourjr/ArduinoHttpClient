@@ -7,7 +7,8 @@
 
 #include <Arduino.h>
 #include <IPAddress.h>
-#include "Client.h"
+#include <WiFi101.h>
+// #include "Client.h"
 
 static const int HTTP_SUCCESS =0;
 // The end of the headers has been reached.  This consumes the '\n'
@@ -38,19 +39,20 @@ static const int HTTP_ERROR_INVALID_RESPONSE =-4;
 #define HTTP_HEADER_USER_AGENT     "User-Agent"
 #define HTTP_HEADER_VALUE_CHUNKED  "chunked"
 
-class HttpClient : public Client
+class HttpClient : public WiFiClient
 {
 public:
     static const int kNoContentLengthHeader =-1;
     static const int kHttpPort =80;
+    static const bool kUseSSL =false;
     static const char* kUserAgent;
 
 // FIXME Write longer API request, using port and user-agent, example
 // FIXME Update tempToPachube example to calculate Content-Length correctly
 
-    HttpClient(Client& aClient, const char* aServerName, uint16_t aServerPort = kHttpPort);
-    HttpClient(Client& aClient, const String& aServerName, uint16_t aServerPort = kHttpPort);
-    HttpClient(Client& aClient, const IPAddress& aServerAddress, uint16_t aServerPort = kHttpPort);
+    HttpClient(WiFiClient& aClient, const char* aServerName, uint16_t aServerPort = kHttpPort, bool aUseSSL = kUseSSL);
+    HttpClient(WiFiClient& aClient, const String& aServerName, uint16_t aServerPort = kHttpPort, bool aUseSSL = kUseSSL);
+    HttpClient(WiFiClient& aClient, const IPAddress& aServerAddress, uint16_t aServerPort = kHttpPort, bool aUseSSL = kUseSSL);
 
     /** Start a more complex request.
         Use this when you need to send additional headers in the request,
@@ -166,9 +168,9 @@ public:
                      const byte aBody[] = NULL);
 
     /** Send an additional header line.  This can only be called in between the
-      calls to beginRequest and endRequest.
+      calls to startRequest and finishRequest.
       @param aHeader Header line to send, in its entirety (but without the
-                     trailing CRLF.  E.g. "Authorization: Basic YQDDCAIGES"
+                     trailing CRLF.  E.g. "Authorization: Basic YQDDCAIGES" 
     */
     void sendHeader(const char* aHeader);
 
@@ -210,6 +212,10 @@ public:
 
     void sendBasicAuth(const String& aUser, const String& aPassword)
       { sendBasicAuth(aUser.c_str(), aPassword.c_str()); }
+
+    /* Connects to server with SSL support */
+    int connectTo(IPAddress ip, uint16_t port);
+    int connectTo(const char* host, uint16_t port);
 
     /** Get the HTTP status code contained in the response.
       For example, 200 for successful request, 404 for file not found, etc.
@@ -307,7 +313,7 @@ public:
     virtual int read();
     virtual int read(uint8_t *buf, size_t size);
     virtual int peek() { return iClient->peek(); };
-    virtual void flush() { iClient->flush(); };
+    virtual void flush() { return iClient->flush(); };
 
     // Inherited from Client
     virtual int connect(IPAddress ip, uint16_t port) { return iClient->connect(ip, port); };
@@ -361,7 +367,7 @@ protected:
         eReadingBodyChunk
     } tHttpState;
     // Client we're using
-    Client* iClient;
+    WiFiClient* iClient;
     // Server we are connecting to
     const char* iServerName;
     IPAddress iServerAddress;
@@ -383,6 +389,8 @@ protected:
     bool iIsChunked;
     // Stores the value of the current chunk length, if present
     int iChunkLength;
+    // Uses connectSSL or not
+    bool iUseSSL;
     uint32_t iHttpResponseTimeout;
     bool iConnectionClose;
     bool iSendDefaultRequestHeaders;

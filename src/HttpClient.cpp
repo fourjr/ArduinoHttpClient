@@ -10,21 +10,21 @@ const char* HttpClient::kUserAgent = "Arduino/2.2.0";
 const char* HttpClient::kContentLengthPrefix = HTTP_HEADER_CONTENT_LENGTH ": ";
 const char* HttpClient::kTransferEncodingChunked = HTTP_HEADER_TRANSFER_ENCODING ": " HTTP_HEADER_VALUE_CHUNKED;
 
-HttpClient::HttpClient(Client& aClient, const char* aServerName, uint16_t aServerPort)
+HttpClient::HttpClient(WiFiClient& aClient, const char* aServerName, uint16_t aServerPort, bool aUseSSL)
  : iClient(&aClient), iServerName(aServerName), iServerAddress(), iServerPort(aServerPort),
-   iConnectionClose(true), iSendDefaultRequestHeaders(true)
+   iConnectionClose(true), iSendDefaultRequestHeaders(true), iUseSSL(aUseSSL)
 {
   resetState();
 }
 
-HttpClient::HttpClient(Client& aClient, const String& aServerName, uint16_t aServerPort)
- : HttpClient(aClient, aServerName.c_str(), aServerPort)
+HttpClient::HttpClient(WiFiClient& aClient, const String& aServerName, uint16_t aServerPort, bool aUseSSL)
+ : HttpClient(aClient, aServerName.c_str(), aServerPort, aUseSSL)
 {
 }
 
-HttpClient::HttpClient(Client& aClient, const IPAddress& aServerAddress, uint16_t aServerPort)
+HttpClient::HttpClient(WiFiClient& aClient, const IPAddress& aServerAddress, uint16_t aServerPort, bool aUseSSL)
  : iClient(&aClient), iServerName(NULL), iServerAddress(aServerAddress), iServerPort(aServerPort),
-   iConnectionClose(true), iSendDefaultRequestHeaders(true)
+   iConnectionClose(true), iSendDefaultRequestHeaders(true), iUseSSL(aUseSSL)
 {
   resetState();
 }
@@ -84,7 +84,7 @@ int HttpClient::startRequest(const char* aURLPath, const char* aHttpMethod,
     {
         if (iServerName)
         {
-            if (!iClient->connect(iServerName, iServerPort) > 0)
+            if (!connectTo(iServerName, iServerPort) > 0)
             {
 #ifdef LOGGING
                 Serial.println("Connection failed");
@@ -94,7 +94,7 @@ int HttpClient::startRequest(const char* aURLPath, const char* aHttpMethod,
         }
         else
         {
-            if (!iClient->connect(iServerAddress, iServerPort) > 0)
+            if (!connectTo(iServerAddress, iServerPort) > 0)
             {
 #ifdef LOGGING
                 Serial.println("Connection failed");
@@ -141,6 +141,25 @@ int HttpClient::startRequest(const char* aURLPath, const char* aHttpMethod,
     }
 
     return ret;
+}
+
+int HttpClient::connectTo(IPAddress ip, uint16_t port) {
+    if (iUseSSL) {
+        return iClient->connectSSL(ip, port);
+    }
+    else {
+        return iClient->connect(ip, port);
+    }
+}
+
+
+int HttpClient::connectTo(const char* host, uint16_t port) {
+    if (iUseSSL) {
+        return iClient->connectSSL(host, port);
+    }
+    else {
+        return iClient->connect(host, port);
+    }
 }
 
 int HttpClient::sendInitialHeaders(const char* aURLPath, const char* aHttpMethod)

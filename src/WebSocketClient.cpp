@@ -5,21 +5,21 @@
 
 #include "WebSocketClient.h"
 
-WebSocketClient::WebSocketClient(Client& aClient, const char* aServerName, uint16_t aServerPort)
+WebSocketClient::WebSocketClient(WiFiClient& aClient, const char* aServerName, uint16_t aServerPort)
  : HttpClient(aClient, aServerName, aServerPort),
    iTxStarted(false),
    iRxSize(0)
 {
 }
 
-WebSocketClient::WebSocketClient(Client& aClient, const String& aServerName, uint16_t aServerPort) 
+WebSocketClient::WebSocketClient(WiFiClient& aClient, const String& aServerName, uint16_t aServerPort) 
  : HttpClient(aClient, aServerName, aServerPort),
    iTxStarted(false),
    iRxSize(0)
 {
 }
 
-WebSocketClient::WebSocketClient(Client& aClient, const IPAddress& aServerAddress, uint16_t aServerPort)
+WebSocketClient::WebSocketClient(WiFiClient& aClient, const IPAddress& aServerAddress, uint16_t aServerPort)
  : HttpClient(aClient, aServerAddress, aServerPort),
    iTxStarted(false),
    iRxSize(0)

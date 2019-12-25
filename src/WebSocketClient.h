@@ -18,9 +18,9 @@ static const int TYPE_PONG             = 0xa;
 class WebSocketClient : public HttpClient
 {
 public:
-    WebSocketClient(Client& aClient, const char* aServerName, uint16_t aServerPort = HttpClient::kHttpPort);
-    WebSocketClient(Client& aClient, const String& aServerName, uint16_t aServerPort = HttpClient::kHttpPort);
-    WebSocketClient(Client& aClient, const IPAddress& aServerAddress, uint16_t aServerPort = HttpClient::kHttpPort);
+    WebSocketClient(WiFiClient& aClient, const char* aServerName, uint16_t aServerPort = HttpClient::kHttpPort);
+    WebSocketClient(WiFiClient& aClient, const String& aServerName, uint16_t aServerPort = HttpClient::kHttpPort);
+    WebSocketClient(WiFiClient& aClient, const IPAddress& aServerAddress, uint16_t aServerPort = HttpClient::kHttpPort);
 
     /** Start the Web Socket connection to the specified path
       @param aURLPath     Path to use in request (optional, "/" is used by default)

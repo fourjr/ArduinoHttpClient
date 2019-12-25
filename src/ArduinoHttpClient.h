@@ -7,6 +7,5 @@
 
 #include "HttpClient.h"
 #include "WebSocketClient.h"
-#include "URLEncoder.h"
 
 #endif

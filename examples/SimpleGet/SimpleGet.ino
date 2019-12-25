@@ -2,8 +2,9 @@
   Simple GET client for ArduinoHttpClient library
   Connects to server once every five seconds, sends a GET request
 
+ 
+
   created 14 Feb 2016
-  modified 22 Jan 2019
   by Tom Igoe
   
   this example is in the public domain
@@ -18,12 +19,15 @@
 char ssid[] = SECRET_SSID;
 char pass[] = SECRET_PASS;
 
+
 char serverAddress[] = "192.168.0.3";  // server address
 int port = 8080;
 
 WiFiClient wifi;
 HttpClient client = HttpClient(wifi, serverAddress, port);
 int status = WL_IDLE_STATUS;
+String response;
+int statusCode = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -50,8 +54,8 @@ void loop() {
   client.get("/");
 
   // read the status code and body of the response
-  int statusCode = client.responseStatusCode();
-  String response = client.responseBody();
+  statusCode = client.responseStatusCode();
+  response = client.responseBody();
 
   Serial.print("Status code: ");
   Serial.println(statusCode);
